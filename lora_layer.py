@@ -259,16 +259,14 @@ class Linear(nn.Linear, LoraLayer):
             # TODO: Merge the LoRA parameters by adding the product of lora_B weights and lora_A weights (after transposing 
             # if necessary) to the original weights, scaled by the LoRA scaling factor. After this operation, set the merged
             # flag to True.
-            # self.weight.data += None ### YOUR CODE HERE ###
             self.weight.data += (
                 transpose(
                 self.lora_B[self.active_adapter].weight @ self.lora_A[self.active_adapter].weight,
                 self.fan_in_fan_out,
                 )
                 * self.scaling[self.active_adapter]
-            )
-            # self.merged = None ### YOUR CODE HERE ###
-            self.merged = True
+            ) ### YOUR CODE HERE ###
+            self.merged = True ### YOUR CODE HERE ###
 
     def unmerge(self):
         # Separate low-rank approximation from original weights
