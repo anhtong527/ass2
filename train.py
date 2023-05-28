@@ -352,7 +352,7 @@ if __name__ == "__main__":
     # Get tokenizer
     tokenizer = load_tokenizer_from_pretrained_model(model_path = model_path)
     mixed_precision_dtype = None
-    
+
     # prepare trainer
     trainer = Trainer(
         model = model, 
@@ -360,7 +360,7 @@ if __name__ == "__main__":
         max_length = max_length,
         batch_size = batch_size,
         gpu_id=local_rank,
-        mixed_precision_dtype = mixed_precision_dtype 
+        mixed_precision_dtype = mixed_precision_dtype,
         tokenizer=tokenizer,
         output_dir= OUTPUT_DIR,
         is_ddp_training = True if distributed_strategy == "ddp" else False,
