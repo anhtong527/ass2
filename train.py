@@ -290,7 +290,7 @@ def load_pretrained_model(local_rank, model_path: str = ""):
 
     model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.float16) ### YOUR CODE HERE ###
     # model_path, dtype=torch.float16, device_map={"": torch.device(f"cuda:{local_rank}")}
-    
+
     # TODO: Create a LoraConfig with the parameters: r=8, lora_alpha=16, 
     # lora_dropout=0.05, bias="none", task_type="CAUSAL_LM".
     # We will then use the config to initialize a LoraModelForCasualLM with the loaded model. 
@@ -351,7 +351,8 @@ if __name__ == "__main__":
     model = load_pretrained_model(local_rank, model_path= model_path)
     # Get tokenizer
     tokenizer = load_tokenizer_from_pretrained_model(model_path = model_path)
-
+    mixed_precision_dtype = None
+    
     # prepare trainer
     trainer = Trainer(
         model = model, 
