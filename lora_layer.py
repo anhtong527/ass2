@@ -303,22 +303,22 @@ class Linear(nn.Linear, LoraLayer):
             # LoRA scaling factor and added to the result.
             # result += None ### YOUR CODE HERE ###
 
-            # result += (
-            #     self.lora_B[self.active_adapter](
-            #         self.lora_A[self.active_adapter](self.lora_dropout[self.active_adapter](x))
-            #     )
-            #     * self.scaling[self.active_adapter]
-            # )
             result += (
                 self.lora_B[self.active_adapter](
-                    F.dropout(
-                        self.lora_A[self.active_adapter](x),
-                        p=self.lora_dropout[self.active_adapter],
-                        training=self.training,
-                    )
+                    self.lora_A[self.active_adapter](self.lora_dropout[self.active_adapter](x))
                 )
                 * self.scaling[self.active_adapter]
             )
+            # result += (
+            #     self.lora_B[self.active_adapter](
+            #         F.dropout(
+            #             self.lora_A[self.active_adapter](x),
+            #             p=self.lora_dropout[self.active_adapter],
+            #             training=self.training,
+            #         )
+            #     )
+            #     * self.scaling[self.active_adapter]
+            # )
         else:
             result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
         
