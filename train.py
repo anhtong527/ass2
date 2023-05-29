@@ -14,6 +14,7 @@ from prepare_data import create_datasets
 from torch.distributed import  destroy_process_group
 from torch.utils.data import DataLoader, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
+from torch.cuda.amp import GradScaler, autocast
 
 
 import warnings
@@ -71,8 +72,8 @@ class Trainer:
             self.ctx = nullcontext()
         else:
             # TODO Otherwise, use 'torch.amp.autocast' context with the specified dtype, and initialize GradScaler if mixed_precision_dtype is float16.
-            self.ctx = None ### YOUR CODE HERE ###
-            self.gradscaler = None ### YOUR CODE HERE ###
+            self.ctx = autocast(device_type=f"cuda:{self.gpu_id}", dtype=mixed_precision_dtype) ### YOUR CODE HERE ###
+            self.gradscaler = GradScaler() ### YOUR CODE HERE ###
             
 
     def _set_ddp_training(self):
@@ -102,7 +103,8 @@ class Trainer:
         # TODO: If 'mixed_precision_dtype' is torch.float16, you have to modify the backward using the gradscaler.
         if self.mixed_precision_dtype==torch.float16:
             ### YOUR CODE HERE ###
-            pass 
+            self.gradscaler.scale(loss).backward()
+             
         else:
             loss.backward()
 
@@ -144,7 +146,8 @@ class Trainer:
                     ### YOUR CODE HERE ###
                     # TODO: optimizer step
                     # TODO: update scaler factor 
-                    pass 
+                    self.gradscaler.step(self.optimizer)
+                    self.gradscaler.update() 
                 else:
                     self.optimizer.step()
                 self.optimizer.zero_grad()
@@ -350,7 +353,7 @@ if __name__ == "__main__":
     model = load_pretrained_model(local_rank, model_path= model_path)
     # Get tokenizer
     tokenizer = load_tokenizer_from_pretrained_model(model_path = model_path)
-    mixed_precision_dtype = None
+    mixed_precision_dtype = torch.float16
 
     # prepare trainer
     trainer = Trainer(
