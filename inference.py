@@ -22,7 +22,6 @@ def generate_inference(instruction: str, user_inp: str, model_path:str, lora_wei
     top_k=40
     top_p=128
     temperature=0.1
-    lora_weights_path=3
     load_8bit=True
     num_beams =1
     max_new_tokens =128
@@ -78,4 +77,3 @@ def generate_inference(instruction: str, user_inp: str, model_path:str, lora_wei
     output = get_response(prompt, tokenizer, model, generation_config, max_new_tokens)
     response = prompter.get_response(output)
     return response
-    

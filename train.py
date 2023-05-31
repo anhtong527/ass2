@@ -23,17 +23,17 @@ torch.manual_seed(42)
 torch.backends.cudnn.deterministic = True
 
 class Trainer:
-    def __init__( self,
-            model, 
-            tokenizer, 
-            gpu_id: int, 
-            is_ddp_training: bool = True, 
-            output_dir: str = 'checkpoints/',  
-            num_epochs: int = 10, 
-            max_length: int = 128, 
-            batch_size: int = 8,
-            mixed_precision_dtype =  None,
-            gradient_accumulation_steps: int = 16):
+    def __init__(self,
+                 model, 
+                 tokenizer, 
+                 gpu_id: int, 
+                 is_ddp_training: bool = True, 
+                 output_dir: str = 'checkpoints/', 
+                 num_epochs: int = 10, 
+                 max_length: int = 128,
+                 batch_size: int = 8,
+                 mixed_precision_dtype =  None,
+                 gradient_accumulation_steps: int = 16):
         """
         Initialize the Trainer class.
 
@@ -157,17 +157,19 @@ class Trainer:
         return epoch_loss
     
     def _save_checkpoint(self, epoch):
-        path_dir = f"{self.output_dir}/epoch_{epoch}"
+        checkpoint_path_dir = f"{self.output_dir}/epoch_{epoch}_checkpoint"
         
         # check path_dir exited
-        if not os.path.exists(path_dir):
-            os.makedirs(path_dir)
+        if not os.path.exists(checkpoint_path_dir):
+            os.makedirs(checkpoint_path_dir)
 
         # save checkpoints
         if self.is_ddp_training and _is_master_process():
-            self.model.module.save_pretrained(path_dir + f'/epoch_{epoch}_checkpoint')
+            # save checkpoints to local
+            self.model.module.save_pretrained(checkpoint_path_dir)
+        
         else:
-            self.model.save_pretrained(path_dir + f'/epoch_{epoch}_checkpoint')
+            self.model.save_pretrained(checkpoint_path_dir)
 
     def prepare_dataloader(self, train_dataset, eval_dataset):
         # TODO: Prepare the training DataLoader. Initialize 'DataLoader' with 'train_dataset' 
@@ -234,7 +236,7 @@ class Trainer:
             data_path = data_path,
             size_valid_set = size_valid_set,
             seed = seed
-           )
+            )
         
         train_dataloader, eval_dataloader = self.prepare_dataloader(train_dataset, eval_dataset)
         
@@ -290,7 +292,9 @@ def load_pretrained_model(local_rank, model_path: str = ""):
     # TODO: Load a pretrained AutoModelForCausalLM from the 'model_path' in float16 data type. 
     # Make sure to set 'device_map' to '{"": torch.device(f"cuda:{local_rank}")}' for DDP training.
 
-    model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.float16, device_map={"": torch.device(f"cuda:{local_rank}")}) ### YOUR CODE HERE ###
+    model = AutoModelForCausalLM.from_pretrained(model_path, 
+                                                 torch_dtype=torch.float16, 
+                                                 device_map={"": torch.device(f"cuda:{local_rank}")}) ### YOUR CODE HERE ###
 
     # TODO: Create a LoraConfig with the parameters: r=8, lora_alpha=16, 
     # lora_dropout=0.05, bias="none", task_type="CAUSAL_LM".
@@ -322,8 +326,8 @@ if __name__ == "__main__":
 
     size_valid_set = 0.1
     max_length = 512
-    num_epochs = 10
-    batch_size = 4
+    num_epochs = 5
+    batch_size = 2
     gradient_accumulation_steps = 16
 
     learning_rate = 3e-4
@@ -336,7 +340,7 @@ if __name__ == "__main__":
     eval_freq = 150
     
     # TODO: Choose strategy
-    distributed_strategy = "ddp" ### YOUR CODE HERE ###
+    distributed_strategy = "no" ### YOUR CODE HERE ###
     
     if distributed_strategy  == "ddp":
         # TODO: Initialize the process group for distributed data parallelism with nccl backend.
@@ -366,7 +370,7 @@ if __name__ == "__main__":
         tokenizer=tokenizer,
         output_dir= OUTPUT_DIR,
         is_ddp_training = True if distributed_strategy == "ddp" else False,
-        gradient_accumulation_steps = gradient_accumulation_steps,
+        gradient_accumulation_steps = gradient_accumulation_steps
     )
     
     # set ddp for wraping model
