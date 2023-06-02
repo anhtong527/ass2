@@ -327,7 +327,7 @@ if __name__ == "__main__":
     size_valid_set = 0.1
     max_length = 512
     num_epochs = 10
-    batch_size = 2
+    batch_size = 4
     gradient_accumulation_steps = 16
 
     learning_rate = 3e-4
@@ -340,7 +340,7 @@ if __name__ == "__main__":
     eval_freq = 150
     
     # TODO: Choose strategy
-    distributed_strategy = "no" ### YOUR CODE HERE ###
+    distributed_strategy = "ddp" # 'no' ### YOUR CODE HERE ###
     
     if distributed_strategy  == "ddp":
         # TODO: Initialize the process group for distributed data parallelism with nccl backend.
@@ -357,7 +357,7 @@ if __name__ == "__main__":
     model = load_pretrained_model(local_rank, model_path= model_path)
     # Get tokenizer
     tokenizer = load_tokenizer_from_pretrained_model(model_path = model_path)
-    mixed_precision_dtype = torch.float16
+    mixed_precision_dtype = None # torch.float16
 
     # prepare trainer
     trainer = Trainer(
