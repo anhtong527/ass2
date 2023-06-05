@@ -183,14 +183,14 @@ class Trainer:
                                           batch_size=self.batch_size,
                                           sampler=DistributedSampler(dataset=train_dataset),
                                           collate_fn=DataCollatorForSeq2Seq(tokenizer=self.tokenizer,
-                                                                            padding='longest',
+                                                                            padding=True,
                                                                             return_tensors='pt'))
         else:
             data_trainloader = DataLoader(dataset=train_dataset, 
                                           batch_size=self.batch_size,
                                           sampler=None,
                                           collate_fn=DataCollatorForSeq2Seq(tokenizer=self.tokenizer,
-                                                                            padding='longest',
+                                                                            padding=True,
                                                                             return_tensors='pt')) ### YOUR CODE HERE ###
 
         # TODO: Prepare the evaluation DataLoader. Initialize 'DataLoader' with 'eval_dataset', 
@@ -201,7 +201,7 @@ class Trainer:
                                      batch_size=self.batch_size,
                                      sampler=SequentialSampler(eval_dataset),
                                      collate_fn=DataCollatorForSeq2Seq(tokenizer=self.tokenizer,
-                                                                       padding='longest',
+                                                                       padding=True,
                                                                        return_tensors='pt')) ### YOUR CODE HERE ###
         
         return data_trainloader, data_testloader
